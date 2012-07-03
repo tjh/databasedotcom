@@ -7,10 +7,12 @@ class String
   end
 
 def constantize
-    unless /\A(?:::)?([A-Z]\w*(?:::[A-Z]\w*)*)\z/ =~ self
-      raise NameError, "#{self.inspect} is not a valid constant name!"
-    end
-    Object.module_eval("::#{$1}", __FILE__, __LINE__)
-  end
+  names = self.split('::')
+  names.shift if names.empty? || names.first.empty?
 
+  constant = Object
+  names.each do |name|
+    constant = constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
+  end
+  constant
 end
